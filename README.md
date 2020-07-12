@@ -22,11 +22,11 @@
 pip install python-telegram-bot requests
 ```
 
-首次运行会在脚本同目录下创建 `weibo_follow_data.txt` 用于保存数据。
+首次运行会在脚本同目录下创建 `weibo_follow_data.json` 用于保存数据。
 
 可在服务器上配置 `crontab` 定时运行。
 
-example:
+Example:
 
 ```crontab
 0 */1 * * * python3 weibo_assistant.py # 每小时整点运行
