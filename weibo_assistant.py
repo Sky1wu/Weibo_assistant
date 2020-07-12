@@ -2,10 +2,11 @@
 
 import requests
 import os
-import pickle
 import telegram
 import time
 from telegram import error as TGError
+import sys
+import json
 
 # 自定义区域
 
@@ -56,6 +57,9 @@ def get_FileModifyTime(filePath):
 
 
 if __name__ == "__main__":
+
+    os.chdir(sys.path[0])
+
     text = ''
 
     cookies = get_cookies(cookies_str)
@@ -86,7 +90,7 @@ if __name__ == "__main__":
                 cards = res['data']['cards'][0]['card_group']
 
             for card in cards:
-                id = card['user']['id']
+                id = str(card['user']['id'])
                 screen_name = card['user']['screen_name']
                 print(id, screen_name)
                 followed[id] = screen_name
@@ -109,9 +113,9 @@ if __name__ == "__main__":
                 print('Telegram 无法连接')
                 exit()
 
-    if os.path.exists('weibo_follow_data.txt'):
-        file = open('weibo_follow_data.txt', 'rb')
-        old = pickle.load(file)
+    if os.path.exists('weibo_follow_data.json'):
+        file = open('weibo_follow_data.json', 'r', encoding='utf-8')
+        old = json.load(file)
         file.close()
 
         diff = DictDiffer(followed, old)
@@ -121,7 +125,7 @@ if __name__ == "__main__":
         changed = diff.changed()
 
         if added or removed or changed:
-            time_stamp = get_FileModifyTime('weibo_follow_data.txt')
+            time_stamp = get_FileModifyTime('weibo_follow_data.json')
             text += ('距 '+time_stamp+'\n')
             text += '关注列表发生如下变化\n\n'
 
@@ -151,6 +155,8 @@ if __name__ == "__main__":
 
             text = ('微博小助手\n\n'+text+'\n')
 
+            print(text)
+
             try:
                 bot = telegram.Bot(token=api_key)
                 bot.sendMessage(chat_id=chat_id, text=text)
@@ -161,6 +167,6 @@ if __name__ == "__main__":
                 print('Telegram 无法连接')
                 exit()
 
-    file = open('weibo_follow_data.txt', 'wb')
-    pickle.dump(followed, file)
+    file = open('weibo_follow_data.json', 'w', encoding='utf-8')
+    json.dump(followed, file,  ensure_ascii=False)
     file.close()
